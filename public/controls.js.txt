@@ -1,0 +1,43 @@
+export const input = {
+  forward: 0,
+  turn: 0,
+  shoot: false
+};
+
+// Keyboard
+window.addEventListener("keydown", e => {
+  if (e.key === "w") input.forward = 1;
+  if (e.key === "s") input.forward = -1;
+});
+window.addEventListener("keyup", () => input.forward = 0);
+
+// Mouse
+window.addEventListener("mousemove", e => {
+  if (document.pointerLockElement)
+    input.turn = -e.movementX * 0.002;
+});
+
+// Mobile joystick
+const stick = document.getElementById("stick");
+let startY = 0;
+stick.addEventListener("touchstart", e => {
+  startY = e.touches[0].clientY;
+});
+stick.addEventListener("touchmove", e => {
+  input.forward = (startY - e.touches[0].clientY) / 50;
+});
+
+// Shoot button
+document.getElementById("shoot").ontouchstart =
+document.getElementById("shoot").onmousedown = () => input.shoot = true;
+document.getElementById("shoot").ontouchend =
+document.getElementById("shoot").onmouseup = () => input.shoot = false;
+
+// Controller (PS / Xbox)
+export function pollGamepad() {
+  const gp = navigator.getGamepads()[0];
+  if (!gp) return;
+  input.forward = -gp.axes[1];
+  input.turn = gp.axes[2] * 0.05;
+  input.shoot = gp.buttons[7].pressed;
+}
