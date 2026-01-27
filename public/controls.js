@@ -41,3 +41,4 @@ export function pollGamepad() {
   input.turn = gp.axes[2] * 0.05;
   input.shoot = gp.buttons[7].pressed;
 }
+
