@@ -1,39 +1,38 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-export function buildMap(scene, data) {
-  data.forEach(obj => {
-    let mesh;
+export const colliders=[];
 
-    if (obj.type === "floor") {
-      mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(obj.w, obj.d),
-        new THREE.MeshStandardMaterial({ color: 0x444444 })
+export function buildMap(scene,data){
+  data.forEach(o=>{
+    let m;
+
+    if(o.type==="floor"){
+      m=new THREE.Mesh(
+        new THREE.PlaneGeometry(o.w,o.d),
+        new THREE.MeshStandardMaterial({color:0x444444})
       );
-      mesh.rotation.x = -Math.PI / 2;
+      m.rotation.x=-Math.PI/2;
     }
 
-    if (obj.type === "box") {
-      mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(obj.w, obj.h, obj.d),
-        new THREE.MeshStandardMaterial({ color: 0x666666 })
+    if(o.type==="box"){
+      m=new THREE.Mesh(
+        new THREE.BoxGeometry(o.w,o.h,o.d),
+        new THREE.MeshStandardMaterial({color:0x666666})
       );
-      mesh.position.y = obj.h / 2;
+      m.position.y=o.h/2;
+      colliders.push(m);
     }
 
-    if (obj.type === "platform") {
-      mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(obj.w, obj.h, obj.d),
-        new THREE.MeshStandardMaterial({ color: 0x888888 })
+    if(o.type==="loot"){
+      m=new THREE.Mesh(
+        new THREE.SphereGeometry(0.5),
+        new THREE.MeshStandardMaterial({color:0xffff00})
       );
+      m.position.y=1;
     }
 
-    mesh.position.x = obj.x;
-    mesh.position.z = obj.z;
-    if (obj.y) mesh.position.y = obj.y;
-
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
-
-    scene.add(mesh);
+    m.position.x=o.x;
+    m.position.z=o.z;
+    scene.add(m);
   });
 }
