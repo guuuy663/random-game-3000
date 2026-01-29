@@ -1,5 +1,7 @@
+
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 import { input, pollGamepad } from "./controls.js";
+import { buildMap } from "./map.js";
 
 const socket = io();
 
@@ -63,3 +65,4 @@ function animate(){
 animate();
 
 document.body.onclick = ()=>document.body.requestPointerLock();
+
