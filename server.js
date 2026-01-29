@@ -1,3 +1,6 @@
+const generateMap = require("./map");
+const mapData = generateMap();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -13,6 +16,7 @@ const players = {};
 io.on("connection", socket => {
   players[socket.id] = {
     x: 0, z: 0, rot: 0, hp: 100
+    socket.emit("map", mapData);
   };
 
   socket.on("update", data => {
