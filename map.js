@@ -42,6 +42,5 @@ function saveMap(map){
 
 module.exports = { loadMap, saveMap };
 
-}
 
 module.exports = generateMap;
