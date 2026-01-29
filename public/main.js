@@ -1,68 +1,56 @@
-
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-import { input, pollGamepad } from "./controls.js";
-import { buildMap } from "./map.js";
+import { input } from "./controls.js";
+import { buildMap, colliders } from "./map.js";
+import { buildWall } from "./build.js";
 
 const socket = io();
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1000);
-camera.position.y = 1.6;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x202020);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(innerWidth, innerHeight);
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000);
+camera.position.y=1.6;
+
+const renderer=new THREE.WebGLRenderer();
+renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
 
 scene.add(new THREE.HemisphereLight(0xffffff,0x444444));
 
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(100,100),
-  new THREE.MeshStandardMaterial({color:0x555555})
-);
-floor.rotation.x = -Math.PI/2;
-scene.add(floor);
+socket.on("map", map=> buildMap(scene,map));
+socket.on("build", obj=> buildMap(scene,[obj]));
 
-const players = {};
-let myId;
+let x=0,z=0,rot=0;
 
-socket.on("connect", ()=> myId = socket.id);
-
-socket.on("state", state => {
-  for (let id in state) {
-    if (!players[id]) {
-      players[id] = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.4,1),
-        new THREE.MeshStandardMaterial({color: id===myId?0x00ff00:0xff0000})
-      );
-      scene.add(players[id]);
-    }
-    players[id].position.set(state[id].x,1,state[id].z);
-    players[id].rotation.y = state[id].rot;
-  }
-});
-
-let x=0, z=0, rot=0;
+function collide(nx,nz){
+  return colliders.some(c=>
+    Math.abs(nx-c.position.x)<2 &&
+    Math.abs(nz-c.position.z)<2
+  );
+}
 
 function animate(){
   requestAnimationFrame(animate);
 
-  pollGamepad();
+  rot+=input.t;
+  const nx=x+Math.sin(rot)*input.f*0.1;
+  const nz=z+Math.cos(rot)*input.f*0.1;
 
-  rot += input.turn;
-  x += Math.sin(rot)*input.forward*0.1;
-  z += Math.cos(rot)*input.forward*0.1;
+  if(!collide(nx,nz)){ x=nx; z=nz; }
 
-  camera.rotation.y = rot;
+  camera.rotation.y=rot;
   camera.position.set(x,1.6,z);
 
-  if (input.shoot) {
-    socket.emit("hit", Object.keys(players).find(id=>id!==myId));
+  if(input.build){
+    const wall=buildWall(x+Math.sin(rot)*3,z+Math.cos(rot)*3);
+    socket.emit("build",wall);
+    input.build=false;
   }
 
   socket.emit("update",{x,z,rot});
   renderer.render(scene,camera);
 }
-animate();
 
-document.body.onclick = ()=>document.body.requestPointerLock();
+document.body.onclick=()=>document.body.requestPointerLock();
+animate();
 
