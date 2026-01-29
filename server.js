@@ -1,9 +1,7 @@
-const generateMap = require("./map");
-const mapData = generateMap();
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { loadMap, saveMap } = require("./map");
 
 const app = express();
 const server = http.createServer(app);
@@ -12,35 +10,24 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const players = {};
+const mapData = loadMap();
 
 io.on("connection", socket => {
-  players[socket.id] = {
-    x: 0, z: 0, rot: 0, hp: 100
-    socket.emit("map", mapData);
-  };
+  players[socket.id] = { x:0,z:0,rot:0 };
 
-  socket.on("update", data => {
-    Object.assign(players[socket.id], data);
+  socket.emit("map", mapData);
+
+  socket.on("update", d => Object.assign(players[socket.id], d));
+
+  socket.on("build", obj => {
+    mapData.push(obj);
+    saveMap(mapData);
+    io.emit("build", obj);
   });
 
-  socket.on("hit", id => {
-    if (players[id]) {
-      players[id].hp -= 25;
-      if (players[id].hp <= 0) {
-        players[id].hp = 100;
-        players[id].x = Math.random() * 10 - 5;
-        players[id].z = Math.random() * 10 - 5;
-      }
-    }
-  });
-
-  socket.on("disconnect", () => {
-    delete players[socket.id];
-  });
+  socket.on("disconnect", ()=> delete players[socket.id]);
 });
 
-setInterval(() => {
-  io.emit("state", players);
-}, 50);
+setInterval(()=> io.emit("state", players), 50);
 
-server.listen(3000, () => console.log("Server running"));
+server.listen(process.env.PORT || 3000);
