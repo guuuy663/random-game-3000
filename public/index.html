@@ -5,14 +5,21 @@
 <title>FPS</title>
 <style>
 body{margin:0;overflow:hidden;background:black}
-#build{position:fixed;bottom:20px;right:20px;width:80px;height:80px;background:#0f0}
+#build,#shop{
+  position:fixed;
+  bottom:20px;
+  width:80px;height:80px;
+  background:#0f0;
+}
+#build{right:20px}
+#shop{left:20px;background:#0ff}
 </style>
 </head>
 <body>
+<div id="shop">SHOP</div>
 <div id="build">BUILD</div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script type="module" src="main.js"></script>
 </body>
 </html>
-
-
