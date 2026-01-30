@@ -4,7 +4,7 @@ const FILE = "savedMap.json";
 function generateMap() {
   const objs = [];
 
-  objs.push({ type:"floor", x:0,z:0,w:100,d:100 });
+  objs.push({ type:"floor", x:0, z:0, w:100, d:100 });
 
   for(let i=0;i<20;i++){
     objs.push({
@@ -29,8 +29,9 @@ function generateMap() {
 }
 
 function loadMap(){
-  if(fs.existsSync(FILE))
-    return JSON.parse(fs.readFileSync(FILE));
+  if(fs.existsSync(FILE)){
+    return JSON.parse(fs.readFileSync(FILE, "utf8"));
+  }
   const map = generateMap();
   saveMap(map);
   return map;
@@ -41,6 +42,3 @@ function saveMap(map){
 }
 
 module.exports = { loadMap, saveMap };
-
-
-module.exports = generateMap;
