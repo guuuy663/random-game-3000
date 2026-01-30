@@ -1,7 +1,8 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { loadMap, saveMap } = require("./map");
+const { loadMap, saveMap } = require("./serverMap");
+
 
 const app = express();
 const server = http.createServer(app);
